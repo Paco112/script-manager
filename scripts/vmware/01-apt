@@ -5,7 +5,7 @@ apt-get -y dist-upgrade
 
 # Apt install pakages
 
-apt-get -y install htop
+apt-get -y install open-vm-tools htop
 
 # Apt cleanup
 
