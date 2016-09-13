@@ -13,6 +13,12 @@ fi
 ## Systemd
 if [ -f "${imagedir}/etc/systemd/logind.conf" ]; then
 
+    # Disable clear console on tty1
+    cat > /etc/systemd/system/getty@tty1.service.d/noclear.conf <<EOF
+    [Service]
+    TTYVTDisallocate=no
+    EOF
+
     # This doesn't completely work
     sed -i 's/^#NAutoVTs=.*/NAutoVTs=1/g' /etc/systemd/logind.conf
     sed -i 's/^#ReserveVT=.*/ReserveVT=1/g' /etc/systemd/logind.conf
@@ -30,9 +36,4 @@ if [ -f "${imagedir}/etc/systemd/logind.conf" ]; then
         systemctl mask getty@tty${tty}.service
     done
 
-    # Disable clear console on tty1
-    cat > /etc/systemd/system/getty@tty1.service.d/noclear.conf <<EOF
-    [Service]
-    TTYVTDisallocate=no
-    EOF
 fi
