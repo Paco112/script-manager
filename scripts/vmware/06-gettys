@@ -1,4 +1,4 @@
-## Disable gettys 2 .. 6
+## Disable gettys 2 .. 6 and disable clear console on tty1
 
 ## System V
 if [ -f "/etc/inittab" ]
@@ -32,4 +32,11 @@ then
     do
         systemctl mask getty@tty${tty}.service
     done
+
+    # Disable clear console on tty1
+    cat > /etc/systemd/system/getty@tty1.service.d/noclear.conf <<EOF
+    [Service]
+    TTYVTDisallocate=no
+    EOF
 fi
+
