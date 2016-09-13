@@ -4,7 +4,7 @@ Copyright (C) Brault François - Mozilla Public Licence 2.0
 
 Download and execute list of scripts defined in scripts.list
 
-ps : You can create your personel script server.
+ps : You can create your personnel script server.
 
 ## SYNOPSIS :
 
@@ -32,3 +32,5 @@ chmod +x script-manager.sh
 
 ##### Download script.list from this repo and asks the user to choose the scripts to run from those available :
 ./script-manager.sh
+
+![ScreenShot](https://raw.githubusercontent.com/Paco112/script-manager/master/screenshot.png)
