@@ -23,6 +23,7 @@ List of scripts folder (separated by a space)
 ## EXEMPLES :
 
 wget --no-check-certificate https://raw.githubusercontent.com/Paco112/script-manager/master/script-manager.sh
+
 chmod +x script-manager.sh
 
 ##### Execute all scripts in script.list with name "scripts_vmware" and "scripts_test" without prompt :
