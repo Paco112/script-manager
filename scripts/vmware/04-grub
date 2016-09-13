@@ -1,0 +1,11 @@
+## Grub config
+
+# Decrease boot timeout
+
+sed -i -e 's/^GRUB_TIMEOUT=[0-9]*/GRUB_TIMEOUT=3/' /etc/default/grub
+
+# Allow show boot message and force disk scheduler NOOP
+
+sed -i -e 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="quiet systemd.show_status=1 elevator=noop"/' /etc/default/grub
+
+update-grub2

@@ -1,0 +1,3 @@
+# Source of all scripts
+scripts_vmware="01-sysctl 02-open-files-limit 03-modprobe 04-grub 05-disable-gettys 06-fstab 07-ssh 08-apt"
+scripts_test="01-test"

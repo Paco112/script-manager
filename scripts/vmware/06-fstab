@@ -1,0 +1,7 @@
+# Disk optimisation
+
+# Add noatime option on all ext mount
+if ! grep -q "noatime" /etc/fstab; then
+    sed -i -e 's/^UUID=\([0-9a-z-]*\)[ \t]*\([^ \t]*\)[ \t]*\(ext[0-9]*\)[ \t]*\([^ \t]*\)[ \t]*\([0-9]*\)[ \t]*\([0-9]*\)/UUID=\1 \2    \3  \4,noatime  \5  \6/g' /etc/fstab
+fi
+

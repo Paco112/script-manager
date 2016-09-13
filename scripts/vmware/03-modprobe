@@ -1,0 +1,24 @@
+## Blacklist module for virtual machine
+
+cat > /etc/modprobe.d/vm-blacklist.conf <<EOF
+blacklist i2c_piix4
+blacklist psmouse
+blacklist coretemp
+blacklist battery
+blacklist pcspkr
+EOF
+
+update-grub2
+
+## Add vmware modules
+
+modules=( vmxnet3 vmw_pvscsi )
+
+for module in "${modules[@]}"
+do
+    if ! grep -q "${module}" /etc/initramfs-tools/modules; then
+        echo "${module}" >> /etc/initramfs-tools/modules
+    fi
+done
+
+update-initramfs -u

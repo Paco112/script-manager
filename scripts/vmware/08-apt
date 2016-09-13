@@ -1,0 +1,13 @@
+# Apt update
+
+apt-get -y update
+apt-get -y dist-upgrade
+
+# Apt install pakages
+
+apt-get -y install htop
+
+# Apt cleanup
+
+apt-get -y autoremove --purge
+apt-get -y clean

@@ -1,0 +1,35 @@
+## Disable gettys 2 .. 6
+
+## System V
+if [ -f "/etc/inittab" ]
+then
+    ttyx=':23:respawn:/sbin/getty 38400 tty'
+
+    for tty in {2..6}
+    do
+        sed -i "s_^\(${tty}${ttyx}${tty}\)_#\1_" /etc/inittab
+    done
+fi
+
+## Systemd
+if [ -f "${imagedir}/etc/systemd/logind.conf" ]
+then
+
+    # This doesn't completely work
+    sed -i 's/^#NAutoVTs=.*/NAutoVTs=1/g' /etc/systemd/logind.conf
+    sed -i 's/^#ReserveVT=.*/ReserveVT=1/g' /etc/systemd/logind.conf
+
+    # Systemd also detects available serial ports and runs gettys on
+    # those too! We need to disable that.
+    systemctl mask serial-getty@ttyS0.service
+    systemctl mask serial-getty@hvc0.service
+
+    # If dbus and logind are not present, Systemd's getty-static
+    # service kicks in and executes getty@tty{2..6} services. Here we
+    # disable getty-static and also getty@tty{2..6} to be extra sure.
+    systemctl mask getty-static.service
+    for tty in {2..6}
+    do
+        systemctl mask getty@tty${tty}.service
+    done
+fi
