@@ -31,7 +31,11 @@ if [ -f "${imagedir}/etc/systemd/logind.conf" ]; then
     done
 
     # Disable clear console on tty1
-cat > /etc/systemd/system/getty@tty1.service.d/noclear.conf <<EOF
+    if [ ! -d "/etc/systemd/system/getty@tty1.service.d" ]; then
+      mkdir /etc/systemd/system/getty@tty1.service.d
+    fi
+
+    cat > /etc/systemd/system/getty@tty1.service.d/noclear.conf <<EOF
 [Service]
 TTYVTDisallocate=no
 EOF
