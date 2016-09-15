@@ -8,7 +8,7 @@ ps : You can create your personnel script server.
 
 ## SYNOPSIS :
 
-./script-manager.sh [-y] [-u url] [-s text]
+./script-manager.sh [-y] [-u url] [-s text] [--disable-update]
 
 ## OPTIONS :
 
@@ -20,6 +20,9 @@ Url of scripts folder
  
 #####-s text 
 List of scripts folder (separated by a space)
+
+#####--disable-update
+Disable auto update
 
 ## EXEMPLES :
 

@@ -4,6 +4,8 @@
 # Git : https://github.com/Paco112/script-manager            #
 ##############################################################
 
+VERSION="0.1"
+
 # Specify colors utilized in the terminal
 normal=$(tput sgr0)              # White
 red=$(tput setaf 1)              # Red
@@ -22,12 +24,16 @@ bldvlt=${txtbld}$(tput setaf 5)  # Bold Violet
 bldcya=${txtbld}$(tput setaf 6)  # Bold Cyan
 bldwht=${txtbld}$(tput setaf 7)  # Bold White
 
+ARGS="$@"
 FORCEYES=0
 BASEDIR=$(pwd)
 LOG_FILE="${BASEDIR}/script-manager.log"
 
 LISTSCRIPTS=""
 TMPSOURCE="/tmp/scripts.list"
+SCRIPT_NAME="${0##*/}"
+CHECK_UPDATE=1
+UPDATE_URL="https://raw.githubusercontent.com/Paco112/script-manager/master/script-manager.sh"
 BASESCRIPTS="https://raw.githubusercontent.com/Paco112/script-manager/master/scripts/"
 
 splashscreen() {
@@ -50,14 +56,27 @@ splashscreen() {
     echo -e "${bldred}           MM MM MM AA   AA NN N NN AA   AA GG      EEEEE   RRRRRR"
     echo -e "${bldred}           MM    MM AAAAAAA NN  NNN AAAAAAA GG   GG EE      RR  RR"
     echo -e "${bldred}           MM    MM AA   AA NN   NN AA   AA  GGGGGG EEEEEEE RR   RR"
+    echo -e "${normal}                                                               v${VERSION}"
     echo -e "\n"
     echo -e "${normal}         Copyright (C) Brault François - Mozilla Public Licence 2.0"
     echo -e "\n"
 }
 
 getargs() {
-    while getopts "ys:u:" opt "$@"; do
+    while getopts "ys:u:-:" opt "$@"; do
         case ${opt} in
+            -)
+            case "${OPTARG}" in
+                disable-update)
+                    CHECK_UPDATE=0
+                ;;
+                *)
+                    if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
+                        echo "Unknown option --${OPTARG}" >&2
+                        exit 1
+                    fi
+                    ;;
+            esac;;
             y)
                 FORCEYES=1
             ;;
@@ -120,6 +139,41 @@ function confirm()
     return 1
 }
 
+checkupdate() {
+    local message="${normal}Check UPDATE"
+    echo -en "${yellow}[LOADING] ${message}"
+    local tmpfile="/tmp/update.tmp"
+    local ret=1
+    cleanfile "${tmpfile}"
+    wget --no-check-certificate --progress=dot -O ${tmpfile} ${UPDATE_URL} 2>&1 | grep --line-buffered "%" | \
+        sed -u -e "s,\.,,g" | awk '{printf("\b\b\b\b%4s", $2)}'
+    if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
+        echo -e "\r\e[0;32m     [OK]\e[0m ${message}"
+        md5_src=$(md5sum "${SCRIPT_NAME}" | awk '{print $1}')
+        md5_new=$(md5sum "${tmpfile}" | awk '{print $1}')
+        if [ "${md5_src}" != "${md5_new}" ] && [ ! -z "${md5_new}" ]; then
+            echo ">>> PACTH '${tmpfile}' => '${BASEDIR}/${SCRIPT_NAME}" >> "${LOG_FILE}" 2>&1
+            echo -en "${yellow}[LOADING] Patch NEW VERSION"
+            bash -c "cp '${tmpfile}' '${BASEDIR}/${SCRIPT_NAME}'" >> "${LOG_FILE}" 2>&1
+            ret=$?
+            if [ ${ret} -eq 0 ]; then
+    		    echo -e "\r\e[0;32m     [OK]\e[0m Patch NEW VERSION"
+    		    echo -e "\n\t RESTARTING ..."
+    		    sleep 2
+    		    exec "${BASEDIR}/${SCRIPT_NAME}" ${ARGS}
+    		    exit $?
+            else
+                echo -e "\r\e[0;31m  [ERROR]\e[0m Patch NEW VERSION"
+            fi
+        else
+            clearlastline
+        fi
+    else
+        echo -e "\r\e[0;31m  [ERROR]\e[0m ${message} (${UPDATE_URL})"
+    fi
+    return ${ret}
+}
+
 # First parameter: MESSAGE
 # Others parameters: COMMAND (! not |)
 displayandexec() {
@@ -156,8 +210,8 @@ downloadandexec() {
     cleanfile "${tmpfile}"
     wget --no-check-certificate --progress=dot -O ${tmpfile} ${url} 2>&1 | grep --line-buffered "%" | \
         sed -u -e "s,\.,,g" | awk '{printf("\b\b\b\b%4s", $2)}'
+    echo -ne "\b\b\b\b"
     if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
-            echo -ne "\b\b\b\b"
     		echo -e "\r\e[0;32m     [OK]\e[0m ${message}"
     		if [ ${script} = "scripts.list" ]; then
     		    # Test script list file and include in source if ok
@@ -178,7 +232,6 @@ downloadandexec() {
     		displayandexec "${script}" bash "${tmpfile}"
     		ret=$?
   	else
-  	        echo -ne "\b\b\b\b"
     		echo -e "\r\e[0;31m  [ERROR]\e[0m ${message} (${url})"
   	fi
   	cleanfile "${tmpfile}"
@@ -199,9 +252,13 @@ in_array() {
 
 checkroot
 
-getargs "$@"
+getargs "${ARGS}"
 
 splashscreen
+
+if [ ${CHECK_UPDATE} -eq 1 ]; then
+    checkupdate
+fi
 
 if ! downloadandexec "scripts.list"; then
     echo -e "\n" &&  exit 0
