@@ -3,6 +3,10 @@
 apt-get -y update
 apt-get -y dist-upgrade
 
+# Apt remove os-prober ( multi-boot )
+
+apt-get -y remove --purge os-prober
+
 # Apt install pakages
 
 apt-get -y install open-vm-tools htop

@@ -8,17 +8,11 @@ blacklist battery
 blacklist pcspkr
 EOF
 
-update-grub2
-
 ## Add vmware modules
 
-modules=( vmxnet3 vmw_pvscsi )
-
-for module in "${modules[@]}"
-do
-    if ! grep -q "${module}" /etc/initramfs-tools/modules; then
-        echo "${module}" >> /etc/initramfs-tools/modules
-    fi
-done
+cat > /etc/modules-load.d/vm-modules.conf <<EOF
+vmxnet3
+vmw_pvscsi
+EOF
 
 update-initramfs -u
