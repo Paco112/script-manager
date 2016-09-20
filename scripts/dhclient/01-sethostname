@@ -1,0 +1,32 @@
+# Auto update hostname from DHCP
+
+cat > /etc/dhcp/dhclient-exit-hooks.d/sethostname <<EOF
+#!/bin/bash
+# dhclient change hostname script
+# /etc/dhcp/dhclient-exit-hooks.d/sethostname
+
+if [ "$reason" = "BOUND" ] && [ "$interface" = "eth0" ]; then
+
+	oldhostname=$(hostname -s)
+	if [ $oldhostname != $new_host_name ]; then
+
+		echo "Update Hostname ..."
+
+		echo new_ip_address=$new_ip_address
+		echo new_host_name=$new_host_name
+		echo new_domain_name=$new_domain_name
+
+		# Rename Host
+		echo $new_host_name > /etc/hostname
+		hostname -F /etc/hostname
+
+		sed -i -e "s/^127\.0\.1\.1.*/127\.0\.1\.1	$new_host_name.$new_domain_name/" /etc/hosts
+
+		# Recreate SSH2 keys
+		echo "Recreate SSH2 keys ..."
+		export DEBIAN_FRONTEND=noninteractive
+		dpkg-reconfigure openssh-server
+	fi
+
+fi
+EOF
