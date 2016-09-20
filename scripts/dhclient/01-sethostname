@@ -22,10 +22,12 @@ if [ "$reason" = "BOUND" ] && [ "$interface" = "eth0" ]; then
 
 		sed -i -e "s/^127\.0\.1\.1.*/127\.0\.1\.1	$new_host_name.$new_domain_name/" /etc/hosts
 
-		# Recreate SSH2 keys
-		echo "Recreate SSH2 keys ..."
-		export DEBIAN_FRONTEND=noninteractive
-		dpkg-reconfigure openssh-server
+        if [ -f /etc/ssh/sshd_config ]; then
+            # Recreate SSH2 keys
+            echo "Recreate SSH2 keys ..."
+            export DEBIAN_FRONTEND=noninteractive
+            dpkg-reconfigure openssh-server
+        fi
 	fi
 
 fi
