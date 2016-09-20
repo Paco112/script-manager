@@ -1,6 +1,6 @@
 # Auto update hostname from DHCP
 
-cat > /etc/dhcp/dhclient-exit-hooks.d/sethostname <<EOF
+cat > /etc/dhcp/dhclient-exit-hooks.d/sethostname <<\EOF
 #!/bin/bash
 # dhclient change hostname script
 # /etc/dhcp/dhclient-exit-hooks.d/sethostname
