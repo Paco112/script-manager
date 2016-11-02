@@ -10,7 +10,7 @@ destfolder="/var/www"
 wget --no-check-certificate -O ${tmpfile} ${DOWNLOAD_URL}
 
 if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
-    unzip ${tmpfile} -d ${destfolder}
+    unzip -o ${tmpfile} -d ${destfolder}
 
     # Change ownership
     chown -R www-data.www-data "${destfolder}/prestashop"
