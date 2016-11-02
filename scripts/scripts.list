@@ -5,3 +5,5 @@ scripts_vmware="01-apt 02-sysctl 03-open-files-limit 04-modprobe 05-grub 06-gett
 scripts_dhclient="01-sethostname"
 
 scripts_webserver="01-apt-dotdeb 02-nginx 03-php7 04-mariadb"
+
+scripts_prestashop="01-install 02-nginx-config"

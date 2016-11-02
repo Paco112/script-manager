@@ -1,0 +1,76 @@
+SITE_NAME="prestashop"
+
+cat > "/etc/nginx/sites-available/${SITE_NAME}" <<\EOF
+server {
+	server_name _;
+	listen 80;
+	access_log   /var/log/nginx/prestashop.access.log;
+	error_log    /var/log/nginx/prestashop.error.log error;
+
+	root /var/www/prestashop;
+	index index.php index.html;
+
+    ##
+    # Gzip Settings
+    ##
+
+    gzip on;
+    gzip_disable "msie6";                                             # Do people still use Internet Explorer 6? In that case, disable gzip and hope for the best!
+    gzip_vary on;                                                     # Also compress content with other MIME types than "text/html"
+    gzip_types application/json text/css application/javascript;      # We only want to compress json, css and js. Compressing images and such isn't worth it
+    gzip_proxied any;
+    gzip_comp_level 6;                                                # Set desired compression ratio, higher is better compression, but slower
+    gzip_buffers 16 8k;                                               # Gzip buffer size
+    gzip_http_version 1.0;                                            # Compress every type of HTTP request
+
+	location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+
+	location = /robots.txt {
+         allow all;
+         log_not_found off;
+         access_log off;
+    }
+
+    # Deny all attempts to access hidden files such as .htaccess, .htpasswd, .DS_Store (Mac).
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    rewrite ^/api/?(.*)$ /webservice/dispatcher.php?url=$1 last;
+    rewrite ^/([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+\.jpg$ /img/p/$1/$1$2.jpg last;
+    rewrite ^/([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+\.jpg$ /img/p/$1/$2/$1$2$3.jpg last;
+    rewrite ^/([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+\.jpg$ /img/p/$1/$2/$3/$1$2$3$4.jpg last;
+    rewrite ^/([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+\.jpg$ /img/p/$1/$2/$3/$4/$1$2$3$4$5.jpg last;
+    rewrite ^/([0-9])([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+\.jpg$ /img/p/$1/$2/$3/$4/$5/$1$2$3$4$5$6.jpg last;
+    rewrite ^/([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+\.jpg$ /img/p/$1/$2/$3/$4/$5/$6/$1$2$3$4$5$6$7.jpg last;
+    rewrite ^/([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+\.jpg$ /img/p/$1/$2/$3/$4/$5/$6/$7/$1$2$3$4$5$6$7$8.jpg last;
+    rewrite ^/([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+\.jpg$ /img/p/$1/$2/$3/$4/$5/$6/$7/$8/$1$2$3$4$5$6$7$8$9.jpg last;
+    rewrite ^/c/([0-9]+)(-[_a-zA-Z0-9-]*)(-[0-9]+)?/.+\.jpg$ /img/c/$1$2.jpg last;
+    rewrite ^/c/([a-zA-Z-]+)(-[0-9]+)?/.+\.jpg$ /img/c/$1.jpg last;
+    rewrite ^/([0-9]+)(-[_a-zA-Z0-9-]*)(-[0-9]+)?/.+\.jpg$ /img/c/$1$2.jpg last;
+
+    # Cache static files for as long as possible
+    location ~*.(ogg|ogv|svg|svgz|eot|otf|woff|ttf|css|js|jpg|jpeg|gif|png|ico)$ {
+        expires max;
+        log_not_found off;
+        access_log off;
+    }
+
+    try_files $uri $uri/ /index.php?$args;
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(.*)$;
+        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+EOF
+
+/etc/init.d/nginx reload

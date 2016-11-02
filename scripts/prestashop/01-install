@@ -1,0 +1,25 @@
+# Download and install pretashop
+
+# Requires package
+apt-get -y install unzip
+
+DOWNLOAD_URL="https://download.prestashop.com/download/old/prestashop_1.6.1.8.zip"
+tmpfile="/tmp/prestashop.zip"
+destfolder="/var/www"
+
+wget --no-check-certificate ${tmpfile} ${DOWNLOAD_URL}
+
+if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
+    unzip ${tmpfile} -d ${destfolder}
+
+    # Change ownership
+    chown -R www-data.www-data "${destfolder}/prestashop"
+
+    # Change permissions of the directories to the recommended 0755
+    find "${destfolder}/prestashop" -type d -exec chmod 755 {} +
+
+    # Change permission of the wp-config.php file and other files to 0644
+    find "${destfolder}/prestashop" -type f -exec chmod 644 {} +
+else
+    exit 1
+fi
