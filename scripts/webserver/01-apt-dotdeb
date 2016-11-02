@@ -1,0 +1,7 @@
+# Add dotdeb repository
+
+echo "deb http://packages.dotdeb.org jessie all" | tee -a /etc/apt/sources.list.d/dotdeb.list
+echo "deb-src http://packages.dotdeb.org jessie all" | tee -a /etc/apt/sources.list.d/dotdeb.list
+wget -qO - http://www.dotdeb.org/dotdeb.gpg | apt-key add -
+
+apt-get -y update
