@@ -74,6 +74,8 @@ server {
 EOF
 
 unlink /etc/nginx/sites-enabled/default
+unlink "/etc/nginx/sites-enabled/${SITE_NAME}"
+
 ln -s "/etc/nginx/sites-available/${SITE_NAME}" "/etc/nginx/sites-enabled/${SITE_NAME}"
 
 /etc/init.d/nginx reload
