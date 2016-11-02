@@ -7,7 +7,7 @@ DOWNLOAD_URL="https://download.prestashop.com/download/old/prestashop_1.6.1.8.zi
 tmpfile="/tmp/prestashop.zip"
 destfolder="/var/www"
 
-wget --no-check-certificate ${tmpfile} ${DOWNLOAD_URL}
+wget --no-check-certificate -O ${tmpfile} ${DOWNLOAD_URL}
 
 if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
     unzip ${tmpfile} -d ${destfolder}
