@@ -29,6 +29,8 @@ FORCEYES=0
 BASEDIR=$(pwd)
 LOG_FILE="${BASEDIR}/script-manager.log"
 
+SCRIPT=$( readlink -m $( type -p $0 ))      # Full path of script
+BASE_DIR=`dirname ${SCRIPT}`                # Directory script is run in
 LISTSCRIPTS=""
 TMPSOURCE="/tmp/scripts.list"
 SCRIPT_NAME="${0##*/}"
@@ -63,7 +65,7 @@ splashscreen() {
 }
 
 getargs() {
-    while getopts "ys:u:-:" opt "$@"; do
+    while getopts "dys:u:-:" opt "$@"; do
         case ${opt} in
             -)
             case "${OPTARG}" in
@@ -77,6 +79,9 @@ getargs() {
                     fi
                     ;;
             esac;;
+            d)
+                CHECK_UPDATE=0
+            ;;
             y)
                 FORCEYES=1
             ;;
@@ -206,12 +211,19 @@ downloadandexec() {
         tmpfile=${TMPSOURCE}
     fi
     local ret=1
-    echo -en "${yellow}[LOADING] ${message}"
-    cleanfile "${tmpfile}"
-    wget --no-check-certificate --progress=dot -O ${tmpfile} ${url} 2>&1 | grep --line-buffered "%" | \
-        sed -u -e "s,\.,,g" | awk '{printf("\b\b\b\b%4s", $2)}'
-    echo -ne "\b\b\b\b"
-    if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
+    if [[ ${BASESCRIPTS} == http* ]]; then
+        echo -en "${yellow}[LOADING] ${message}"
+        cleanfile "${tmpfile}"
+        wget --no-check-certificate --progress=dot -O ${tmpfile} ${url} 2>&1 | grep --line-buffered "%" | \
+            sed -u -e "s,\.,,g" | awk '{printf("\b\b\b\b%4s", $2)}'
+        echo -ne "\b\b\b\b"
+    else
+        tmpfile="./${url}"
+        if [ ${script} = "scripts.list" ]; then
+            cp ${tmpfile} ${TMPSOURCE}
+        fi
+    fi
+    if [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
     		echo -e "\r\e[0;32m     [OK]\e[0m ${message}"
     		if [ ${script} = "scripts.list" ]; then
     		    # Test script list file and include in source if ok
@@ -234,7 +246,9 @@ downloadandexec() {
   	else
     		echo -e "\r\e[0;31m  [ERROR]\e[0m ${message} (${url})"
   	fi
-  	cleanfile "${tmpfile}"
+  	if [[ ${BASESCRIPTS} == http* ]]; then
+  	    cleanfile "${tmpfile}"
+  	fi
   	return ${ret}
 }
 

@@ -3,23 +3,31 @@
 # Requires package
 apt-get -y install unzip
 
-DOWNLOAD_URL="https://download.prestashop.com/download/old/prestashop_1.6.1.8.zip"
 tmpfile="/tmp/prestashop.zip"
-destfolder="/var/www"
+
+DOWNLOAD_URL=$(whiptail --inputbox "Link to download prestashop" 8 80 "https://download.prestashop.com/download/old/prestashop_1.6.1.8.zip" --title "Download" 3>&1 1>/dev/tty 2>&3)
+DEST_FOLDER=$(whiptail --inputbox "Path to install prestashop" 8 80 "/var/www/prestashop" --title "Install" 3>&1 1>/dev/tty 2>&3)
 
 wget --no-check-certificate -O ${tmpfile} ${DOWNLOAD_URL}
 
 if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
-    unzip -o ${tmpfile} -d ${destfolder}
+    unzip -n ${tmpfile} 'prestashop/*' -d ${DEST_FOLDER}
+    if [ $? -eq 0 ]; then
 
-    # Change ownership
-    chown -R www-data.www-data "${destfolder}/prestashop"
+        rm ${tmpfile} && \
 
-    # Change permissions of the directories to the recommended 0755
-    find "${destfolder}/prestashop" -type d -exec chmod 755 {} +
+        mv ${DEST_FOLDER}/prestashop/* ${DEST_FOLDER} && \
 
-    # Change permission of the wp-config.php file and other files to 0644
-    find "${destfolder}/prestashop" -type f -exec chmod 644 {} +
-else
-    exit 1
+        # Change ownership
+        chown -R www-data.www-data ${DEST_FOLDER}  && \
+
+        # Change permissions of the directories to the recommended 0755
+        find ${DEST_FOLDER} -type d -exec chmod 755 {} + && \
+
+        # Change permission of the wp-config.php file and other files to 0644
+        find ${DEST_FOLDER} -type f -exec chmod 644 {} +
+
+        exit $?
+    fi
 fi
+exit 1
