@@ -1,6 +1,6 @@
 SITE_NAME=$(whiptail --inputbox "Name of website" 8 80 "prestashop" --title "Web Site" 3>&1 1>/dev/tty 2>&3)
 SITE_PATH=$(whiptail --inputbox "Path of website" 8 80 "/var/www/prestashop" --title "Path" 3>&1 1>/dev/tty 2>&3)
-SERVER_NAME=$(whiptail --inputbox "Server name ( domains )" 8 80 "prestashop.com www.prestashop.com" --title "Server Name" 3>&1 1>/dev/tty 2>&3)
+SERVER_NAME=$(whiptail --inputbox "Server name ( domains )" 8 80 "prestashop.dev www.prestashop.dev" --title "Server Name" 3>&1 1>/dev/tty 2>&3)
 
 cat > "/etc/nginx/sites-available/${SITE_NAME}" <<EOF
 server {
@@ -70,7 +70,7 @@ server {
         include fastcgi_params;
         fastcgi_pass unix:/run/php/php7.0-fpm.sock;
         fastcgi_split_path_info ^(.+\.php)(.*)\$;
-        fastcgi_param  SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
     }
 }
 EOF
