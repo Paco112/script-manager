@@ -1,6 +1,7 @@
 # Install MariaDB
 
-PASSWORD=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+GEN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+PASSWORD=$(whiptail --inputbox "Root Password" 8 80 "${GEN_PASSWORD}" --title "MariaDB" 3>&1 1>/dev/tty 2>&3)
 
 echo "mariadb=$PASSWORD" >> password.log
 
