@@ -7,3 +7,5 @@ scripts_dhclient="01-sethostname"
 scripts_webserver="01-apt-dotdeb 02-nginx 03-php7 04-mariadb"
 
 scripts_prestashop="01-install 02-nginx-config"
+
+scripts_mysql_remote="01-config"

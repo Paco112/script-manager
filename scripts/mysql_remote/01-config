@@ -1,0 +1,19 @@
+ROOT_PASSWORD=$(whiptail --inputbox "Root Password" 8 80 "" --title "MySQL" 3>&1 1>/dev/tty 2>&3)
+
+if [ ! ROOT_PASSWORD || ROOT_PASSWORD == "" ]; then
+    exit 1
+fi
+
+mysql -u root -p${ROOT_PASSWORD} << EOF
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '${ROOT_PASSWORD}';
+EOF
+
+if [ $? != 0 ]; then
+    exit 1
+fi
+
+sed -i 's/^bind-address = 127.0.0.1/#bind-address = 127.0.0.1/g' /etc/mysql/my.cnf
+
+/etc/init.d/mysql reload
+
+exit $?
