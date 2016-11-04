@@ -11,15 +11,11 @@ PASSWORD=$(whiptail --inputbox "Mysql password to prestashop" 8 80 "${GEN_PASSWO
 IPACCESS=$(whiptail --inputbox "Mysql ip access" 8 80 "127.0.0.1" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
 DATABASE=$(whiptail --inputbox "Mysql database to prestashop" 8 80 "prestashop" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
 
+echo "$USER=$PASSWORD" > password_prestashop.log
+
 if [ -z ${USER} ] || [ -z ${PASSWORD} ] || [ -z ${IPACCESS} ] || [ -z ${DATABASE} ]; then
     exit 1
 fi
-
-cat <<EOF
-CREATE DATABASE IF NOT EXISTS $DATABASE;
-CREATE USER '$USER'@'$IPACCESS' IDENTIFIED BY '$PASSWORD';
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER ON $DATABASE.* TO '$USER'@'$IPACCESS';
-EOF
 
 mysql -u root -p${ROOT_PASSWORD} <<EOF
 CREATE DATABASE IF NOT EXISTS $DATABASE;
