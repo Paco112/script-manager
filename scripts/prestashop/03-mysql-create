@@ -1,11 +1,13 @@
 ROOT_PASSWORD=$(whiptail --inputbox "Root Password" 8 80 "" --title "MySQL" 3>&1 1>/dev/tty 2>&3)
 
-if [ ! ${ROOT_PASSWORD} ] || [ ${ROOT_PASSWORD} == "" ]; then
+if [ -z ${ROOT_PASSWORD} ] ; then
     exit 1
 fi
 
-USER=$(whiptail --inputbox "Mysql user to prestashop" 8 80 "" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
-PASSWORD=$(whiptail --inputbox "Mysql password to prestashop" 8 80 "" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
+GEN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+
+USER=$(whiptail --inputbox "Mysql user to prestashop" 8 80 "prestashop" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
+PASSWORD=$(whiptail --inputbox "Mysql password to prestashop" 8 80 "${GEN_PASSWORD}" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
 IPACCESS=$(whiptail --inputbox "Mysql ip access" 8 80 "127.0.0.1" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
 DATABASE=$(whiptail --inputbox "Mysql database to prestashop" 8 80 "prestashop" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
 
