@@ -278,7 +278,7 @@ if ! downloadandexec "scripts.list"; then
     echo -e "\n" &&  exit 0
 fi
 
-list_scripts=($(sed -n 's/^scripts\_\([a-z0-9]\+\_\)=.*/\1/p' ${TMPSOURCE}))
+list_scripts=($(sed -n 's/^scripts\_\([a-z0-9\_]\+\)=.*/\1/p' ${TMPSOURCE}))
 cleanfile "${TMPSOURCE}"
 
 if [ ${#list_scripts[@]} -le 0 ]; then
