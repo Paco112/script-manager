@@ -1,0 +1,13 @@
+# Disable kernel error messages : WRITE SAME failed. Manually zeroing.
+
+if [ -d "/etc/tmpfiles.d" ]; then
+
+    find /sys | grep max_write_same_blocks > /etc/tmpfiles.d/write_same.conf
+
+    sed -i 's/^\/\(.*\)/w \/\1  -   -   -   -  0/g' /etc/tmpfiles.d/write_same.conf
+
+    exit $?
+
+fi
+
+exit 1

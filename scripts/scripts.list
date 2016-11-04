@@ -1,6 +1,6 @@
 # Source of all scripts
 
-scripts_vmware="01-apt 02-sysctl 03-open-files-limit 04-modprobe 05-grub 06-gettys 07-fstab 08-ssh"
+scripts_vmware="01-apt 02-sysctl 03-open-files-limit 04-modprobe 05-grub 06-gettys 07-fstab 08-ssh 09-disable-write-same"
 
 scripts_dhclient="01-sethostname"
 
