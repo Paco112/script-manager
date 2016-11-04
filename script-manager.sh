@@ -150,7 +150,7 @@ checkupdate() {
     local tmpfile="/tmp/update.tmp"
     local ret=1
     cleanfile "${tmpfile}"
-    wget --no-check-certificate --progress=dot -O ${tmpfile} ${UPDATE_URL} 2>&1 | grep --line-buffered "%" | \
+    wget --no-cache --no-check-certificate --progress=dot -O ${tmpfile} ${UPDATE_URL} 2>&1 | grep --line-buffered "%" | \
         sed -u -e "s,\.,,g" | awk '{printf("\b\b\b\b%4s", $2)}'
     if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
         echo -e "\r\e[0;32m     [OK]\e[0m ${message}"
@@ -214,7 +214,7 @@ downloadandexec() {
     if [[ ${BASESCRIPTS} == http* ]]; then
         echo -en "${yellow}[LOADING] ${message}"
         cleanfile "${tmpfile}"
-        wget --no-check-certificate --progress=dot -O ${tmpfile} ${url} 2>&1 | grep --line-buffered "%" | \
+        wget --no-cache --no-check-certificate --progress=dot -O ${tmpfile} ${url} 2>&1 | grep --line-buffered "%" | \
             sed -u -e "s,\.,,g" | awk '{printf("\b\b\b\b%4s", $2)}'
         echo -ne "\b\b\b\b"
     else
