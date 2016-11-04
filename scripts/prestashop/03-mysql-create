@@ -1,0 +1,22 @@
+ROOT_PASSWORD=$(whiptail --inputbox "Root Password" 8 80 "" --title "MySQL" 3>&1 1>/dev/tty 2>&3)
+
+if [ ! ${ROOT_PASSWORD} ] || [ ${ROOT_PASSWORD} == "" ]; then
+    exit 1
+fi
+
+USER=$(whiptail --inputbox "Mysql user to prestashop" 8 80 "" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
+PASSWORD=$(whiptail --inputbox "Mysql password to prestashop" 8 80 "" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
+IPACCESS=$(whiptail --inputbox "Mysql ip access" 8 80 "127.0.0.1" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
+DATABASE=$(whiptail --inputbox "Mysql database to prestashop" 8 80 "prestashop" --title "MySQL Prestashop" 3>&1 1>/dev/tty 2>&3)
+
+if [ -z ${USER} ] || [ -z ${PASSWORD} ] || [ -z ${IPACCESS} ] || [ -z ${DATABASE} ]; then
+    exit 1
+fi
+
+mysql -u root -p${ROOT_PASSWORD} << EOF
+CREATE IF NOT EXISTS ${DATABASE};
+CREATE USER '${USER}'@'${IPACCESS}' IDENTIFIED BY '${PASSWORD}';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER ON '${DATABASE}'.* TO '${USER}'@'${IPACCESS}';
+EOF
+
+exit $?
