@@ -29,6 +29,9 @@ character_set_server  = utf8
 collation_server      = utf8_general_ci
 EOF
 
+# fix permission
+chmod 644 /etc/mysql/conf.d/mariadb.cnf
+
 /etc/init.d/mysql restart
 
 exit $?
