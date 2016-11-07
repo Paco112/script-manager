@@ -4,8 +4,7 @@ DISTRIB_VERSION=$(grep ^VERSION_ID /etc/*-release  | awk -F '=' '{print $2}' | s
 
 add_ppa() {
   grep -h "^deb.*$1" /etc/apt/sources.list.d/* > /dev/null 2>&1
-  if [ $? -ne 0 ]
-  then
+  if [ $? -ne 0 ]; then
     echo "Adding ppa:$1"
     sudo add-apt-repository -y ppa:$1
     return 0
@@ -19,7 +18,7 @@ if [ DISTRIB_NAME == "Debian GNU/Linux" ] && [ DISTRIB_VERSION == "8" ] && [ ! -
     echo "deb http://packages.dotdeb.org jessie all" | tee -a /etc/apt/sources.list.d/dotdeb.list
     echo "deb-src http://packages.dotdeb.org jessie all" | tee -a /etc/apt/sources.list.d/dotdeb.list
     wget -qO - http://www.dotdeb.org/dotdeb.gpg | apt-key add -
-elif [ DISTRIB_NAME == "Ubuntu" ] &&  [ DISTRIB_VERSION == "14.04" ]
+else if [ DISTRIB_NAME == "Ubuntu" ] && [ DISTRIB_VERSION == "14.04" ]
     add_ppa ondrej/php
 fi
 
