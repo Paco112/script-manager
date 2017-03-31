@@ -13,7 +13,16 @@ mkdir -p ${DEST_FOLDER}
 wget --no-check-certificate -O ${tmpfile} ${DOWNLOAD_URL}
 
 if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
-    unzip -n ${tmpfile} 'prestashop/*' -d ${DEST_FOLDER}
+    {
+        # Unzip format prestashop <= 1.6
+        unzip -n ${tmpfile} 'prestashop/*' -d ${DEST_FOLDER}
+    } || {
+        # Unzip format prestashop 1.7
+        mkdir -p /tmp/prestashop
+        unzip -n ${tmpfile} 'prestashop.zip' -d /tmp/prestashop && \
+        mkdir -p "${DEST_FOLDER}/prestashop" && \
+        mv /tmp/prestashop "${DEST_FOLDER}/prestashop" && \
+    }
     if [ $? -eq 0 ]; then
 
         rm ${tmpfile} && \
