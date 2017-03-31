@@ -15,28 +15,30 @@ wget --no-check-certificate -O ${tmpfile} ${DOWNLOAD_URL}
 if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}' ) -gt 0 ]; then
     {
         # Unzip format prestashop <= 1.6
-        unzip -n ${tmpfile} 'prestashop/*' -d ${DEST_FOLDER}
+        unzip -n ${tmpfile} 'prestashop/*' -d "${DEST_FOLDER}"
     } || {
         # Unzip format prestashop 1.7
-        mkdir -p /tmp/prestashop
+        mkdir -p /tmp/prestashop && \
         unzip -n ${tmpfile} 'prestashop.zip' -d /tmp/prestashop && \
         mkdir -p "${DEST_FOLDER}/prestashop" && \
         mv /tmp/prestashop "${DEST_FOLDER}/prestashop"
+    } || {
+        exit 1
     }
     if [ $? -eq 0 ]; then
 
         rm ${tmpfile} && \
 
-        mv ${DEST_FOLDER}/prestashop/* ${DEST_FOLDER} && \
+        mv "${DEST_FOLDER}/prestashop/*" "${DEST_FOLDER}" && \
 
         # Change ownership
-        chown -R www-data.www-data ${DEST_FOLDER}  && \
+        chown -R www-data.www-data "${DEST_FOLDER}"  && \
 
         # Change permissions of the directories to the recommended 0755
-        find ${DEST_FOLDER} -type d -exec chmod 755 {} + && \
+        find "${DEST_FOLDER}" -type d -exec chmod 755 {} + && \
 
         # Change permission of the wp-config.php file and other files to 0644
-        find ${DEST_FOLDER} -type f -exec chmod 644 {} +
+        find "${DEST_FOLDER}" -type f -exec chmod 644 {} +
 
         exit $?
     fi
