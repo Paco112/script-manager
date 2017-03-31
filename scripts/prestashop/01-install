@@ -18,9 +18,11 @@ if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}'
         unzip -n ${tmpfile} 'prestashop/*' -d "${DEST_FOLDER}"
     } || {
         # Unzip format prestashop 1.7
-        mkdir -p /tmp/prestashop && \
-        unzip -n ${tmpfile} 'prestashop.zip' -d /tmp/prestashop && \
-        mv /tmp/prestashop "${DEST_FOLDER}/prestashop"
+        mkdir -p /tmp/unzip && \
+        unzip -n ${tmpfile} 'prestashop.zip' -d /tmp/unzip && \
+        unzip -n /tmp/unzip/prestashop.zip -d /tmp/unzip/prestashop && \
+        mv /tmp/unzip/prestashop "${DEST_FOLDER}/prestashop" && \
+        rm -r /tmp/unzip
     } || {
         exit 1
     }
@@ -28,7 +30,9 @@ if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}'
 
         rm ${tmpfile} && \
 
-        mv "${DEST_FOLDER}/prestashop/*" "${DEST_FOLDER}" && \
+        mv "${DEST_FOLDER}/prestashop/"* "${DEST_FOLDER}" && \
+
+        rm -r "${DEST_FOLDER}/prestashop" && \
 
         # Change ownership
         chown -R www-data.www-data "${DEST_FOLDER}"  && \
