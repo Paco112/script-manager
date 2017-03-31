@@ -20,7 +20,6 @@ if [ $? -eq 0 ] && [ -f ${tmpfile} ] && [ $( wc -c ${tmpfile} | awk '{print $1}'
         # Unzip format prestashop 1.7
         mkdir -p /tmp/prestashop && \
         unzip -n ${tmpfile} 'prestashop.zip' -d /tmp/prestashop && \
-        mkdir -p "${DEST_FOLDER}/prestashop" && \
         mv /tmp/prestashop "${DEST_FOLDER}/prestashop"
     } || {
         exit 1
