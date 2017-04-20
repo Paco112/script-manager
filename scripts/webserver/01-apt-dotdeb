@@ -16,11 +16,11 @@ add_ppa() {
 
 echo "OS:${DISTRIB_NAME} - VERSION:${DISTRIB_VERSION}"
 
-if [ $DISTRIB_NAME == "Debian GNU/Linux" ] && [ $DISTRIB_VERSION == "8" ] && [ ! -f /etc/apt/sources.list.d/dotdeb.list ]; then
+if [ "${DISTRIB_NAME}" == "Debian GNU/Linux" ] && [ "${DISTRIB_VERSION}" == "8" ] && [ ! -f /etc/apt/sources.list.d/dotdeb.list ]; then
     echo "deb http://packages.dotdeb.org jessie all" | tee -a /etc/apt/sources.list.d/dotdeb.list
     echo "deb-src http://packages.dotdeb.org jessie all" | tee -a /etc/apt/sources.list.d/dotdeb.list
     wget -qO - http://www.dotdeb.org/dotdeb.gpg | apt-key add -
-elif [ $DISTRIB_NAME == "Ubuntu" ] && [ $DISTRIB_VERSION == "14.04" ]; then
+elif [ "${DISTRIB_NAME}" == "Ubuntu" ] && [ "${DISTRIB_VERSION}" == "14.04" ]; then
     add_ppa ondrej/php
 fi
 
