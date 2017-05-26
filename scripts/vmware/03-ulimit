@@ -1,0 +1,19 @@
+# Increase Limits
+
+cat > /etc/security/limits.d/vm-limits.conf <<EOF
+# (file size)
+*         hard    fsize      unlimited
+*         soft    fsize      unlimited
+# (cpu time)
+*         hard    cpu        unlimited
+*         soft    cpu        unlimited
+# (virtual memory size)
+*         hard    as         unlimited
+*         soft    as         unlimited
+# (open files)
+*         hard    nofile     64000
+*         soft    nofile     64000
+# (processes/threads)
+*         hard    nproc      64000
+*         soft    nproc      64000
+EOF
