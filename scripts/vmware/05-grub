@@ -4,8 +4,10 @@
 
 sed -i -e 's/^GRUB_TIMEOUT=[0-9]*/GRUB_TIMEOUT=3/' /etc/default/grub
 
-# Allow show boot message and force disk scheduler NOOP
+# Allow show boot message
+# Force disk scheduler NOOP
+# Disabling Transparent HugePages
 
-sed -i -e 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="quiet systemd.show_status=1 elevator=noop"/' /etc/default/grub
+sed -i -e 's/^GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="quiet systemd.show_status=1 elevator=noop transparent_hugepage=never"/' /etc/default/grub
 
 update-grub2
