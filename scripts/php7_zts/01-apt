@@ -1,0 +1,11 @@
+# Apt update
+
+apt-get -y update
+
+# Apt build essential
+apt-get -y install build-essential
+
+# Apt build deps
+apt-get -y install libfcgi-dev libfcgi0ldbl libjpeg62-turbo-dev libmcrypt-dev libssl-dev libc-client2007e \
+libc-client2007e-dev libxml2-dev libbz2-dev libcurl4-openssl-dev libjpeg-dev libpng-dev libfreetype6-dev \
+libkrb5-dev libpq-dev libxml2-dev libxslt1-dev pkg-config git

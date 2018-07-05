@@ -1,0 +1,128 @@
+if [ -f /usr/sbin/php-fpm ]; then
+    if !(whiptail --title "Rebuild PHP" --yesno "Rebuild PHP ?" 8 80 3>&1 1>/dev/tty 2>&3) then
+        exit 0
+    fi
+    REBUILD = 1
+    systemctl stop php-fpm.service
+else
+    REBUILD = 0
+fi
+
+NB_CORES=$(grep ^cpu\\scores /proc/cpuinfo | uniq |  awk '{print $4}')
+
+PHP7_VERSION=$(whiptail --inputbox "PHP7 Version ?" 8 80 "7.2.7" --title "PHP7 Version" 3>&1 1>/dev/tty 2>&3)
+
+PHP7_USER=$(whiptail --inputbox "PHP7 User ?" 8 80 "www-data" --title "PHP7 User" 3>&1 1>/dev/tty 2>&3)
+
+PHP7_URL="http://fr2.php.net/distributions/php-${PHP7_VERSION}.tar.gz"
+
+tmpfile="/tmp/php-${PHP7_VERSION}.tar.gz"
+
+wget --no-check-certificate -O ${tmpfile} ${PHP7_URL}
+
+tar -C /tmp -xvzf ${tmpfile}
+
+cd "/tmp/php-${PHP7_VERSION}"
+
+./buildconf --force
+
+./configure \
+	  --prefix=/usr/share/php \
+	  --exec-prefix=/usr \
+	  --datarootdir=/usr \
+	  --datadir=/usr/share \
+	  --mandir=/usr/share/man \
+	  --docdir=/usr/share/doc/php \
+	  --with-config-file-path=/etc/php \
+	  --with-config-file-scan-dir=/etc/php/conf.d \
+	  --with-curl \
+	  --with-pear=/usr/share/php/PEAR \
+	  --with-gd \
+	  --with-jpeg-dir \
+	  --with-zlib \
+	  --with-freetype-dir \
+	  --with-mhash \
+	  --with-mysqli \
+	  --with-pdo-mysql \
+	  --with-openssl \
+	  --with-libxml-dir \
+	  --with-xmlrpc \
+	  --with-bz2 \
+	  --with-tsrm-pthreads \
+	  --with-fpm-user=www-data \
+	  --with-fpm-group=www-data \
+	  --without-pdo-sqlite \
+	  --without-sqlite3 \
+	  --disable-debug \
+      --enable-fpm \
+      --enable-cli \
+      --enable-inline-optimization \
+      --enable-maintainer-zts \
+	  --enable-opcache \
+	  --enable-exif \
+	  --enable-wddx \
+	  --enable-zip \
+	  --enable-bcmath \
+	  --enable-calendar \
+	  --enable-mbstring \
+	  --enable-soap \
+	  --enable-sockets \
+	  --enable-shmop \
+	  --enable-sysvsem \
+	  --enable-sysvshm \
+	  --enable-sysvmsg
+
+make -j ${NB_CORES} install
+
+if [ REBUILD == 1 ]; then
+    exit 0
+fi
+
+mkdir -p /run/php
+
+mkdir /var/log/php-fpm
+chown -R ${PHP7_USER}.${PHP7_USER} /var/log/php-fpm
+
+mkdir -p /etc/php
+cp -R /usr/share/php/etc/* /etc/php
+mkdir /etc/php/conf.d
+
+mv /etc/php/php-fpm.conf.default /etc/php/php-fpm.conf
+mv /etc/php/php-fpm.d /etc/php/pool.d
+mv /etc/php/pool.d/www.conf.default /etc/php/pool.d/www.conf
+
+cp -f php.ini-production /etc/php/php.ini
+chmod 644 /etc/php/php.ini
+
+cp -f /etc/php/php.ini /etc/php/php-cli.ini
+
+sed -i -e "s#include=/usr/share/php/etc/php-fpm.d/*.conf#include=/etc/php/pool.d/*.conf#g" /etc/php/php-fpm.conf
+sed -i -e "s#;pid = run/php-fpm.pid#pid = /run/php/php-fpm.pid#g" /etc/php/php-fpm.conf
+sed -i -e "s#;error_log = log/php-fpm.log#error_log = /var/log/php-fpm/php-fpm.log#g" /etc/php/php-fpm.conf
+
+sed -i -e "s#listen = 127.0.0.1:9000#listen = /run/php/php-fpm.sock#g" /etc/php/pool.d/www.conf
+sed -i -e "s#www-data#${PHP7_USER}#g" /etc/php/pool.d/www.conf
+sed -i -e "s#;listen.owner#listen.owner#g" /etc/php/pool.d/www.conf
+sed -i -e "s#;listen.group#listen.group#g" /etc/php/pool.d/www.conf
+
+cat <<EOF > /lib/systemd/system/php-fpm.service
+[Unit]
+Description=The PHP FastCGI Process Manager
+Documentation=man:php-fpm(8)
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+PIDFile=/run/php/php-fpm.pid
+ExecStart=/usr/sbin/php-fpm --nodaemonize --fpm-config /etc/php/php-fpm.conf
+ExecReload=/bin/kill -USR2 \$MAINPID
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+rm -r ${tmpfile}
+
+systemctl enable php-fpm.service
+systemctl daemon-reload

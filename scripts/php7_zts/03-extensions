@@ -1,0 +1,79 @@
+whiptail --title "PECL Addons" --checklist --separate-output "PECL Addons:" 10 80 4 "Opcache" "" on "pThreads" "" on "MongoDB" "" off "Xdebug" "" off 3>&1 1>/dev/tty 2>/tmp/EXTENSIONS_CHOICE
+
+NB_CORES=$(grep ^cpu\\scores /proc/cpuinfo | uniq |  awk '{print $4}')
+
+function opcache_install {
+    echo "zend_extension=opcache.so" > /etc/php/conf.d/10-opcache.ini
+}
+
+function mongodb_install {
+    VERSION=$(whiptail --inputbox "Mongo Version ?" 8 80 "1.5.0" --title "Mongo Version" 3>&1 1>/dev/tty 2>&3)
+    cd /tmp
+    git clone https://github.com/mongodb/mongo-php-driver.git
+    cd mongo-php-driver
+    git checkout tags/${VERSION}
+    git submodule update --init
+    phpize
+    ./configure
+    make -j ${NB_CORES} all
+    make -j ${NB_CORES} install
+    echo "extension=mongodb.so" > /etc/php/conf.d/20-mongodb.ini
+    rm -r /tmp/mongo-php-driver
+}
+
+function pthreads_install {
+    VERSION=$(whiptail --inputbox "pThreads Commit ID ?" 8 80 "99a86fab88ede56a7ae0bd3e70249425caf5ad05" --title "pThreads Commit ID" 3>&1 1>/dev/tty 2>&3)
+    cd /tmp
+    git clone https://github.com/krakjoe/pthreads.git
+    cd pthreads
+    git checkout ${VERSION}
+    phpize
+    ./configure
+    make -j ${NB_CORES}
+    make -j ${NB_CORES} install
+    if [[ $(sed -n '/pthreads.so/p' /etc/php/php-cli.ini) == "" ]]; then
+        echo "extension=pthreads.so" >> /etc/php/php-cli.ini
+    fi
+    rm -r /tmp/pthreads
+}
+
+function xdebug_install {
+    VERSION=$(whiptail --inputbox "Xdebug Version ?" 8 80 "2.6.0" --title "Xdebug Version" 3>&1 1>/dev/tty 2>&3)
+    cd /tmp
+    git clone https://github.com/xdebug/xdebug.git
+    cd xdebug
+    git checkout tags/${VERSION}
+    phpize
+    ./configure --enable-xdebug
+    make clean
+    make -j ${NB_CORES}
+    make -j ${NB_CORES} install
+    XDEBUG_HOST=$(whiptail --inputbox "Xdebug Host IP ?" 8 80 "127.0.0.1" --title "Xdebug Host" 3>&1 1>/dev/tty 2>&3)
+    cat <<EOF > /etc/php/conf.d/20-xdebug.ini
+zend_extension=xdebug.so
+xdebug.remote_port=9002
+xdebug.remote_enable=On
+xdebug.remote_connect_back=On
+xdebug.remote_log=/var/log/php/xdebug.log
+xdebug.remote_host=${XDEBUG_HOST}
+EOF
+    rm -r /tmp/xdebug
+}
+
+while read choice
+do
+    case ${choice} in
+            Opcache) opcache_install
+            ;;
+            MongoDB) mongodb_install
+            ;;
+            Xdebug) xdebug_install
+            ;;
+            pThreads) pthreads_install
+            ;;
+            *)
+            ;;
+    esac
+done < /tmp/EXTENSIONS_CHOICE
+
+rm /tmp/EXTENSIONS_CHOICE
