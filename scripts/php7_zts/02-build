@@ -56,6 +56,7 @@ cd "/tmp/php-${PHP7_VERSION}"
 	  --disable-debug \
       --enable-fpm \
       --enable-cli \
+      --enable-pcntl \
       --enable-inline-optimization \
       --enable-maintainer-zts \
 	  --enable-opcache \
