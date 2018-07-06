@@ -1,4 +1,4 @@
-whiptail --title "PECL Addons" --checklist --separate-output "PECL Addons:" 10 80 4 "Opcache" "" on "pThreads" "" on "MongoDB" "" off "Xdebug" "" off 3>&1 1>/dev/tty 2>/tmp/EXTENSIONS_CHOICE
+whiptail --title "PECL Addons" --checklist --separate-output "PECL Addons:" 10 80 5 "Opcache" "" on "pThreads" "" on "MongoDB" "" off "Redis" "" off "Xdebug" "" off 3>&1 1>/dev/tty 2>/tmp/EXTENSIONS_CHOICE
 
 NB_CORES=$(grep ^cpu\\scores /proc/cpuinfo | uniq |  awk '{print $4}')
 
