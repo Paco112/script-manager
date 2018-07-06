@@ -37,6 +37,20 @@ function pthreads_install {
     rm -r /tmp/pthreads
 }
 
+function redis_install {
+    VERSION=$(whiptail --inputbox "Redis Version ?" 8 80 "4.0.2" --title "Redis Version" 3>&1 1>/dev/tty 2>&3)
+    cd /tmp
+    https://github.com/phpredis/phpredis.git
+    cd phpredis
+    git checkout tags/${VERSION}
+    phpize
+    ./configure
+    make -j ${NB_CORES}
+    make -j ${NB_CORES} install
+    echo "extension=redis.so" > /etc/php/conf.d/20-redis.ini
+    rm -r /tmp/phpredis
+}
+
 function xdebug_install {
     VERSION=$(whiptail --inputbox "Xdebug Version ?" 8 80 "2.6.0" --title "Xdebug Version" 3>&1 1>/dev/tty 2>&3)
     cd /tmp
