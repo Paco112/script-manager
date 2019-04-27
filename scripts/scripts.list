@@ -8,6 +8,8 @@ scripts_webserver="02-nginx 03-php7 04-mariadb"
 
 scripts_webserver_dotdeb="01-apt-dotdeb 02-nginx 03-php7 04-mariadb"
 
+scripts_vhost="01-create-vhost"
+
 scripts_prestashop="01-install 02-nginx-config 03-mysql-create"
 
 scripts_mysql_remote="01-config"

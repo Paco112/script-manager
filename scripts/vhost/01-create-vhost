@@ -1,0 +1,106 @@
+
+GEN_USER_PASSWORD=$(date +%s | sha256sum | base64 | head -c 16 ; echo)
+
+BASE_DIRECTORY=$(whiptail --inputbox "Base Directory" 8 80 "/home" --title "Base Directory" 3>&1 1>/dev/tty 2>&3)
+USER=$(whiptail --inputbox "User Name" 8 80 "" --title "User Name" 3>&1 1>/dev/tty 2>&3)
+USER_GROUP=$(whiptail --inputbox "User Group" 8 80 "sftp_users" --title "User Group" 3>&1 1>/dev/tty 2>&3)
+USER_PASSWORD=$(whiptail --inputbox "User Password" 8 80 "${GEN_USER_PASSWORD}" --title "User Password" 3>&1 1>/dev/tty 2>&3)
+
+groupadd ${USER_GROUP}
+useradd ${USER}
+mkdir -p ${BASE_DIRECTORY}/${USER}/{www,logs,backups}
+usermod -g ${USER_GROUP} ${USER}
+usermod -d ${BASE_DIRECTORY}/${USER} ${USER}
+chown -R ${USER}.${USER_GROUP} ${BASE_DIRECTORY}/${USER}/www
+chown -R www-data.www-data ${BASE_DIRECTORY}/${USER}/logs
+usermod --password $(openssl passwd -1 ${USER_PASSWORD}) ${USER}
+
+GEN_DB_PASSWORD=$(date +%s | sha256sum | base64 | head -c 16 ; echo)
+MYSQL_USER_PASSWORD=$(whiptail --inputbox "MySQL User Password" 8 80 "${GEN_DB_PASSWORD}" --title "MySQL User Password" 3>&1 1>/dev/tty 2>&3)
+
+mysql -u root <<EOF
+CREATE DATABASE ${USER};
+CREATE USER '${USER}'@'localhost' IDENTIFIED BY '${MYSQL_USER_PASSWORD}';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, INDEX ON ${USER}.* TO '${USER}'@'localhost';
+FLUSH PRIVILEGES;
+EOF
+
+PHP_VERSION=$(whiptail --inputbox "PHP Version" 8 80 "7.0" --title "PHP Version" 3>&1 1>/dev/tty 2>&3)
+
+cat > /etc/php/${PHP_VERSION}/fpm/pool.d/${USER}.conf <<EOF
+[${USER}]
+user = ${USER}
+group = ${USER_GROUP}
+listen = /run/php/${USER}.sock
+listen.owner = www-data
+listen.group = www-data
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+EOF
+
+DNS_SITE=$(whiptail --inputbox "DNS Website" 8 80 "www.exemple.com exemple.com" --title "DNS Website" 3>&1 1>/dev/tty 2>&3)
+
+# @todo Ajouter plusieur templates de sites wordpress ...
+
+cat > /etc/nginx/sites-available/${USER} <<EOF
+server {
+        listen   80;
+        listen   [::]:80 ipv6only=on;
+
+        server_name ${DNS_SITE};
+
+        root ${BASE_DIRECTORY}/${USER}/www;
+        index index.php index.html;
+
+        error_log ${BASE_DIRECTORY}/${USER}/logs/error.log error;
+        #access_log ${BASE_DIRECTORY}/${USER}/logs/access.log;
+
+        client_max_body_size 50M;
+
+        # Do not save logs for these
+        location = /favicon.ico {
+            log_not_found off;
+            access_log off;
+        }
+        location = /robots.txt {
+            auth_basic off;
+            allow all;
+            log_not_found off;
+            access_log off;
+        }
+
+        location / {
+            try_files \$uri \$uri/ /index.php?\$args;
+        }
+
+        # File security
+        location ~ /\. {
+            deny all;
+        }
+
+        location ~ \.php\$ {
+            # Verify that the file exists, redirect to index if not
+            try_files \$fastcgi_script_name /index.php\$uri&\$args;
+
+            fastcgi_index index.php;
+            include fastcgi_params;
+
+            #fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+            fastcgi_param PATH_INFO \$fastcgi_script_name;
+
+            fastcgi_pass unix:/run/php/${USER}.sock;
+        }
+}
+EOF
+
+ln -s /etc/nginx/sites-available/${USER} /etc/nginx/sites-enabled/${USER}
+
+service nginx testconfig && service nginx reload && service php${PHP_VERSION}-fpm restart
+
+# @todo Ajouter la possibilité de télécharger et installer le modèle de site choisi précédement
+
+exit $?
