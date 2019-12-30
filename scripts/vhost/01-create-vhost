@@ -25,7 +25,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, INDEX ON ${USER}.* TO
 FLUSH PRIVILEGES;
 EOF
 
-PHP_VERSION=$(whiptail --inputbox "PHP Version" 8 80 "7.0" --title "PHP Version" 3>&1 1>/dev/tty 2>&3)
+PHP_VERSION=$(whiptail --inputbox "PHP Version" 8 80 "7.3" --title "PHP Version" 3>&1 1>/dev/tty 2>&3)
 
 cat > /etc/php/${PHP_VERSION}/fpm/pool.d/${USER}.conf <<EOF
 [${USER}]
