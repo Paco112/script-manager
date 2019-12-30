@@ -12,6 +12,8 @@ server {
     root ${SITE_PATH};
     index index.php index.html;
 
+    client_max_body_size 128M;
+
     ##
     # Gzip Settings
     ##
