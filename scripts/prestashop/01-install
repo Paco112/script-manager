@@ -5,7 +5,7 @@ apt-get -y install unzip
 
 tmpfile="/tmp/prestashop.zip"
 
-DOWNLOAD_URL=$(whiptail --inputbox "Link to download prestashop" 8 80 "https://download.prestashop.com/download/old/prestashop_1.6.1.8.zip" --title "Download" 3>&1 1>/dev/tty 2>&3)
+DOWNLOAD_URL=$(whiptail --inputbox "Link to download prestashop" 8 80 "https://download.prestashop.com/download/releases/prestashop_1.7.6.2.zip" --title "Download" 3>&1 1>/dev/tty 2>&3)
 DEST_FOLDER=$(whiptail --inputbox "Path to install prestashop" 8 80 "/var/www/prestashop" --title "Install" 3>&1 1>/dev/tty 2>&3)
 
 mkdir -p ${DEST_FOLDER}
