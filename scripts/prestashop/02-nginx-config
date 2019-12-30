@@ -4,13 +4,13 @@ SERVER_NAME=$(whiptail --inputbox "Server name ( domains )" 8 80 "prestashop.dev
 
 cat > "/etc/nginx/sites-available/${SITE_NAME}" <<EOF
 server {
-	server_name ${SERVER_NAME};
-	listen 80;
-	access_log   /var/log/nginx/${SITE_NAME}.access.log;
-	error_log    /var/log/nginx/${SITE_NAME}.error.log error;
+    server_name ${SERVER_NAME};
+    listen 80;
+    access_log   /var/log/nginx/${SITE_NAME}.access.log;
+    error_log    /var/log/nginx/${SITE_NAME}.error.log error;
 
-	root ${SITE_PATH};
-	index index.php index.html;
+    root ${SITE_PATH};
+    index index.php index.html;
 
     ##
     # Gzip Settings
@@ -25,12 +25,12 @@ server {
     gzip_buffers 16 8k;                                               # Gzip buffer size
     gzip_http_version 1.0;                                            # Compress every type of HTTP request
 
-	location = /favicon.ico {
+    location = /favicon.ico {
         log_not_found off;
         access_log off;
     }
 
-	location = /robots.txt {
+    location = /robots.txt {
          allow all;
          log_not_found off;
          access_log off;
@@ -107,6 +107,10 @@ server {
         fastcgi_max_temp_file_size 0;
         fastcgi_busy_buffers_size 256k;
         fastcgi_temp_file_write_size 256k;
+        fastcgi_param PHP_VALUE "max_input_vars=5000
+        memory_limit=256M
+        post_max_size=128M
+        upload_max_filesize=128M";
     }
 }
 EOF
